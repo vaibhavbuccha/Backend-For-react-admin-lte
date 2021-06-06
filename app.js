@@ -3,6 +3,9 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 dotenv.config();
 
+// routers
+const AdminRouter = require("./router/Admin");
+
 // create App
 const app = express();
 const port = process.env.PORT || 8000;
@@ -17,6 +20,7 @@ mongoose
 
 // middlewares
 app.use(express.json());
+app.use("/api/v1/admin/", AdminRouter);
 
 // testing url
 app.get("/", (req, res) => {

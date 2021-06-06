@@ -1,48 +1,54 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
-const SALT_WORK_FACTOR = 10;
+var salt = bcrypt.genSaltSync(10);
 
-const AdminSchema = await new Schema({
-  name: {
-    type: String,
-    required: [true, "Name is required"],
-  },
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    email: [true, "Enter valid email address"],
-  },
-  password: {
-    type: String,
-    required: [true, "Password is required"],
-    select: false,
-  },
-  role: {
-    type: String,
-    enum: ["Admin", "Hr"],
-    default: "Hr",
-  },
-});
+const validateEmail = (email) => {
+  var emailRegex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return emailRegex.test(email);
+};
 
-AdminSchema.virtual("password").set(function () {
-  this._password = password;
-});
+const AdminSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: [true, "Email must be unique"],
+      validate: [validateEmail, "Enter valid email address"],
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      select: false,
+    },
+    role: {
+      type: String,
+      enum: ["Admin", "Hr"],
+      default: "Hr",
+    },
+  },
+  { timestamps: true }
+);
 
-AdminSchema.pre("save", function (next) {
-  const user = this;
-  if (user._password == undefined) {
-    return next();
-  }
-  bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
-    if (err) console.log(err);
-    // hash the password using our new salt
-    bcrypt.hash(user._password, salt, function (err, hash) {
-      if (err) console.log(err);
-      user.password = hash;
-      next();
-    });
-  });
+/*
+AdminSchema.path("email").validate(function (email) {
+  console.log(email);
+  var emailRegex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return emailRegex.test(email); // Assuming email has a text attribute
+}, "The e-mail field cannot be empty.");
+*/
+
+AdminSchema.pre("save", async function (next) {
+  let password = await bcrypt.hashSync(this.password, salt);
+  this.password = password;
+  console.log(`Hash: ${password}`);
+  next();
 });
 
 AdminSchema.methods = {
