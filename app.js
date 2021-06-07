@@ -1,6 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const cors = require("cors");
+const morgan = require("morgan");
 dotenv.config();
 
 // routers
@@ -19,6 +21,8 @@ mongoose
   .catch((err) => console.log(err.stack));
 
 // middlewares
+app.use(cors());
+app.use(morgan("combined"));
 app.use(express.json());
 app.use("/api/v1/admin/", AdminRouter);
 
