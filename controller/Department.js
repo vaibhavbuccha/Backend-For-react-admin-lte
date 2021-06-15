@@ -31,3 +31,22 @@ exports.departments = (req, res) => {
     });
   });
 };
+
+exports.getDepartmentById = async (req, res, next, id) => {
+  console.log(id);
+  await Department.findById(id).exec((err, department) => {
+    if (err)
+      return res.status(400).json({ success: false, error: err.message });
+
+    req.department = department;
+    next();
+  });
+};
+
+exports.getDepartment = async (req, res) => {
+  let department = await req.department;
+  res.json({
+    success: true,
+    data: department,
+  });
+};
