@@ -8,6 +8,7 @@ dotenv.config();
 // routers
 const AdminRouter = require("./router/Admin");
 const DepartmentRouter = require("./router/Department");
+const RoleRouter = require("./router/Role");
 
 // create App
 const app = express();
@@ -27,6 +28,7 @@ app.use(morgan("combined"));
 app.use(express.json());
 app.use("/api/v1/admin/", AdminRouter);
 app.use("/api/v1/department/", DepartmentRouter);
+app.use("/api/v1/role/", RoleRouter);
 
 // testing url
 app.get("/", (req, res) => {
